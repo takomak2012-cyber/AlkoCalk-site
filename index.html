@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AlkoCalk — калькулятор разбавления спирта</title>
+<meta name="description" content="AlkoCalk — калькулятор разбавления спирта с учётом контракции раствора. Восемь режимов расчёта: вода, объём, итоговая крепость, температурная поправка, смеси, головы, ректификация.">
+<meta name="theme-color" content="#2E7D32">
+<meta property="og:type" content="website">
+<meta property="og:title" content="AlkoCalk — калькулятор разбавления спирта">
+<meta property="og:description" content="Восемь режимов расчёта, учёт контракции, температурная поправка спиртометра. Работает без интернета.">
+<meta property="og:url" content="https://takomak2012-cyber.github.io/AlkoCalk-site/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+:root{
+  --bg:#F3F3F3; --text:#1A1A1A; --muted:#5C5C5C;
+  --surface:#FFFFFF; --border:#DDDDDD; --chip:#E4E4E4;
+  --accent:#2E7D32; --accent-dark:#1B5E20; --accent-fg:#FFFFFF;
+  --shadow:rgba(0,0,0,0.08);
+}
+html.dark{
+  --bg:#1E1F22; --text:#ECECEC; --muted:#A6A6A6;
+  --surface:#26282C; --border:#3A3D42; --chip:#33363B;
+  --accent:#43A047; --accent-dark:#2E7D32;
+  --shadow:rgba(0,0,0,0.45);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:'Segoe UI', Roboto, system-ui, sans-serif;
+  line-height:1.55; transition:background .2s, color .2s;
+}
+.wrap{max-width:920px; margin:0 auto; padding:16px 16px 48px}
+
+header.top{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:10px 0 18px;
+}
+.brand{display:flex; align-items:center; gap:12px; min-width:0}
+.brand svg{flex:none}
+.brand h1{font-size:22px; margin:0; line-height:1.15}
+.brand p{margin:2px 0 0; color:var(--muted); font-size:13px}
+.theme-btn{
+  flex:none; width:38px; height:38px; border-radius:50%;
+  border:none; background:var(--chip); color:var(--text);
+  font-size:17px; cursor:pointer;
+}
+.theme-btn:hover{filter:brightness(.95)}
+
+.hero{
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:16px; padding:26px 22px; box-shadow:0 2px 12px var(--shadow);
+  margin-bottom:22px;
+}
+.hero h2{margin:0 0 8px; font-size:26px; line-height:1.25}
+.hero p.lead{margin:0 0 18px; color:var(--muted); font-size:15px; max-width:62ch}
+.btn-row{display:flex; flex-wrap:wrap; gap:10px}
+.btn{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:11px 20px; border-radius:10px; border:1px solid transparent;
+  font-size:15px; font-weight:600; text-decoration:none; cursor:pointer;
+  transition:transform .08s, background .15s;
+}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--accent); color:var(--accent-fg)}
+.btn-primary:hover{background:var(--accent-dark)}
+.btn-secondary{background:var(--chip); color:var(--text); border-color:var(--border)}
+.btn-secondary:hover{filter:brightness(.95)}
+.dlnote{margin:12px 0 0; color:var(--muted); font-size:12.5px}
+
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:18px}
+.chip{
+  background:var(--chip); color:var(--muted);
+  border-radius:999px; padding:5px 12px; font-size:12.5px;
+}
+
+h3.sec{font-size:18px; margin:30px 0 12px; padding-left:11px; border-left:4px solid var(--accent)}
+
+.grid{display:grid; gap:12px; grid-template-columns:repeat(auto-fill, minmax(260px,1fr))}
+.mode{
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; padding:14px 15px; box-shadow:0 1px 6px var(--shadow);
+  border-left:4px solid var(--c);
+}
+.mode h4{margin:0 0 5px; font-size:15px}
+.mode p{margin:0; color:var(--muted); font-size:13.5px}
+
+.note{
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; padding:16px 18px; box-shadow:0 1px 6px var(--shadow);
+  font-size:14.5px;
+}
+.note p{margin:0 0 10px}
+.note p:last-child{margin-bottom:0}
+.note .muted{color:var(--muted); font-size:13.5px}
+
+.calc-demo{
+  font-family:ui-monospace, Consolas, monospace; font-size:14px;
+  background:var(--chip); border-radius:8px; padding:12px 14px; margin:12px 0;
+  overflow-x:auto; white-space:pre;
+}
+.calc-demo .ok{color:var(--accent); font-weight:700}
+.calc-demo .bad{color:#C62828; text-decoration:line-through}
+html.dark .calc-demo .bad{color:#EF9A9A}
+
+ul.feat{list-style:none; margin:0; padding:0; display:grid; gap:10px;
+        grid-template-columns:repeat(auto-fill, minmax(280px,1fr))}
+ul.feat li{
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; padding:13px 15px; font-size:14px;
+  box-shadow:0 1px 6px var(--shadow);
+}
+ul.feat li b{display:block; margin-bottom:3px}
+ul.feat li span{color:var(--muted); font-size:13px}
+
+footer{
+  margin-top:38px; padding-top:20px; border-top:1px solid var(--border);
+  color:var(--muted); font-size:13.5px;
+}
+footer a{color:var(--accent); text-decoration:none}
+footer a:hover{text-decoration:underline}
+footer .fgrid{display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); margin-bottom:16px}
+footer h5{margin:0 0 6px; color:var(--text); font-size:13.5px}
+footer ul{list-style:none; margin:0; padding:0}
+footer li{margin-bottom:4px}
+.copy{text-align:center; padding-top:14px; border-top:1px solid var(--border); font-size:12.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="brand">
+    <svg width="42" height="42" viewBox="0 0 48 48" aria-hidden="true">
+      <rect x="2" y="2" width="44" height="44" rx="11" fill="#2E7D32"/>
+      <path d="M24 10c0 0 8 9.2 8 14.4A8 8 0 0 1 16 24.4C16 19.2 24 10 24 10z" fill="#fff"/>
+      <text x="24" y="40" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" font-family="Segoe UI, sans-serif">%</text>
+    </svg>
+    <div>
+      <h1>AlkoCalk</h1>
+      <p>Калькулятор разбавления спирта · версия 4.14</p>
+    </div>
+  </div>
+  <button class="theme-btn" id="themeBtn" title="Сменить тему" aria-label="Сменить тему">🌙</button>
+</header>
+
+<section class="hero">
+  <h2>Точное разбавление спирта<br>с учётом контракции</h2>
+  <p class="lead">
+    AlkoCalk считает по таблицам плотности этанола при 20&nbsp;°C и пересчитывает объёмные доли
+    в массовые. Поэтому итоговый объём получается реальным, а не арифметическим.
+    Все расчёты выполняются на устройстве — интернет не нужен.
+  </p>
+  <div class="btn-row">
+    <a class="btn btn-primary" href="https://www.rustore.ru/catalog/app/com.alkoka.app">📦 Доступно в RuStore</a>
+    <a class="btn btn-secondary" href="download/AlkoCalk_4.14.apk" download="AlkoCalk_4.14.apk">⬇ APK 4.14 напрямую</a>
+    <a class="btn btn-secondary" href="privacy.html">Политика конфиденциальности</a>
+  </div>
+  <p class="dlnote">Версия 4.14 · Android 7.0 и выше · 4,1 МБ · подпись не менялась с 4.3</p>
+  <div class="chips">
+    <span class="chip">Android 7.0+</span>
+    <span class="chip">Работает офлайн</span>
+    <span class="chip">RU · EN · BY</span>
+    <span class="chip">Светлая и тёмная тема</span>
+    <span class="chip">18+</span>
+  </div>
+</section>
+
+<h3 class="sec">Восемь режимов расчёта</h3>
+<div class="grid">
+  <div class="mode" style="--c:#4FC3F7"><h4>💧 Вода</h4><p>Сколько воды добавить к известному объёму спирта, чтобы получить нужную крепость.</p></div>
+  <div class="mode" style="--c:#81C784"><h4>📊 Объём</h4><p>Сколько спирта и воды взять для заданного готового объёма.</p></div>
+  <div class="mode" style="--c:#FFB74D"><h4>🔬 Итог спирта</h4><p>Какая крепость получится при смешивании известных объёмов спирта и воды.</p></div>
+  <div class="mode" style="--c:#E57373"><h4>🌡️ Температура</h4><p>Реальная крепость по показанию спиртометра с поправкой на температуру раствора.</p></div>
+  <div class="mode" style="--c:#BA68C8"><h4>🧪 Смеси</h4><p>Сколько жидкости B добавить к жидкости A для получения нужной крепости.</p></div>
+  <div class="mode" style="--c:#4DD0E1"><h4>🧫 Многокомпонентная</h4><p>Общий объём и крепость смеси из нескольких компонентов.</p></div>
+  <div class="mode" style="--c:#FF8A65"><h4>🎯 Головы</h4><p>Объём и крепость голов при дробной перегонке.</p></div>
+  <div class="mode" style="--c:#7986CB"><h4>⚗️ Ректификация</h4><p>Теоретические и реальные тарелки, объём продукта, флегмовое число и выход.</p></div>
+</div>
+
+<h3 class="sec">Разница с обычным калькулятором</h3>
+<div class="note">
+  <p>При смешении спирта с водой объём уменьшается — это называется контракцией.
+     Простое сложение объёмов даёт недолив.</p>
+  <div class="calc-demo">500 мл спирта 96&nbsp;% → до 40&nbsp;%
+
+<span class="bad">Арифметика:      700 мл воды</span>
+<span class="ok">AlkoCalk:        735,13 мл воды</span>
+<span class="ok">Итоговый объём:  1200 мл</span></div>
+  <p class="muted">Расхождение — 35 мл на одной операции. Чем больше объём, тем заметнее ошибка.</p>
+</div>
+
+<h3 class="sec">Ещё возможности</h3>
+<ul class="feat">
+  <li><b>Напоминания о настойках</b><span>Введите название и число дней — приложение пришлёт уведомление о готовности. Таймеры переживают перезагрузку устройства.</span></li>
+  <li><b>Универсальные единицы</b><span>Крепость в процентах, градусах, ppm и массовых процентах. Объём в мл, л, мкл и каплях.</span></li>
+  <li><b>История расчётов</b><span>Последние вычисления сохраняются и открываются в один тап.</span></li>
+  <li><b>Проверка ввода</b><span>Подсказка по каждому полю и сообщение об ошибке прямо в форме.</span></li>
+  <li><b>Три языка</b><span>Интерфейс на русском, английском и белорусском.</span></li>
+  <li><b>Без регистрации</b><span>Ни аккаунта, ни облака, ни сбора статистики. Всё хранится на телефоне.</span></li>
+</ul>
+
+<footer>
+  <div class="fgrid">
+    <div>
+      <h5>Загрузка</h5>
+      <ul>
+        <li><a href="https://www.rustore.ru/catalog/app/com.alkoka.app">Карточка в RuStore</a></li>
+        <li><a href="https://github.com/takomak2012-cyber/C2H5OH/issues">Сообщить о проблеме</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Документы</h5>
+      <ul>
+        <li><a href="privacy.html">Политика конфиденциальности</a></li>
+        <li><a href="https://takomak2012-cyber.github.io/app-ads.txt">app-ads.txt</a></li>
+      </ul>
+    </div>
+    <div>
+      <h5>Разработчик</h5>
+      <ul>
+        <li>Вячеслав Долар</li>
+        <li><a href="mailto:takomak2012@yandex.ru">takomak2012@yandex.ru</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="copy">
+    AlkoCalk — свободное приложение под лицензией MIT.<br>
+    18+ · Употребление алкоголя вредит вашему здоровью.
+  </div>
+</footer>
+
+</div>
+<script>
+(function(){
+  var k='alkocalc-site-theme', b=document.getElementById('themeBtn');
+  var s=localStorage.getItem(k);
+  var dark=s? s==='dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+  function apply(){
+    document.documentElement.classList.toggle('dark', dark);
+    b.textContent = dark ? '☀️' : '🌙';
+  }
+  apply();
+  b.addEventListener('click', function(){
+    dark=!dark; localStorage.setItem(k, dark?'dark':'light'); apply();
+  });
+})();
+</script>
+</body>
+</html>

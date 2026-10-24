@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <rect x="2" y="2" width="44" height="44" rx="11" fill="#2E7D32"/>
+  <path d="M24 9c0 0 8.5 9.8 8.5 15.3A8.5 8.5 0 0 1 15.5 24.3C15.5 18.8 24 9 24 9z" fill="#FFFFFF"/>
+  <text x="24" y="41" font-size="14" font-weight="700" fill="#FFFFFF"
+        text-anchor="middle" font-family="Segoe UI, Roboto, sans-serif">%</text>
+</svg>
